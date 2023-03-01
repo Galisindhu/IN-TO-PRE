@@ -1,0 +1,137 @@
+#include<stdio.h>
+#include<string.h>
+
+char stack[25];                                           //char stack
+int top=-1;
+
+void push(char item){                                    //push elements in the stack
+    stack[++top] = item;                                
+}
+
+char pop(){
+    return stack[top--];                                //pop elements from the stack
+}
+
+char precedence(char ch){
+
+    switch(ch){
+
+        case '+' :                                      
+        case '-' :
+            return 2;                                  //+ and - operators are given precedence 2
+            break;
+
+        case '/' :                                    
+        case '*' :
+            return 3;                                 /// and * operators are given precedence 3
+            break;
+
+        case '^' :
+            return 4;                                //^ operator are given precedence 4
+            break;
+
+        case '(':
+        case ')':
+        case '#':
+            return 1;                               //(,) and # operators are given precedence 1
+            break;
+
+        default :
+            return 0;                              
+    }
+}
+
+
+
+int isOperator(char symbol){
+
+    switch(symbol){
+        case '+':
+        case '-':
+        case '*':
+        case '/':
+        case '^':
+        case '(':
+        case ')':
+            return 1;                               //if operators in the infix expression then return 1
+            break;
+
+        default:
+            return 0;                               //if operand return 0
+
+    }
+}
+
+
+
+void convert(char infix[], char prefix[]){          //converts infix expression to prefix expression
+
+    int i, symbol, j=0;
+    stack[++top] = '#';                             //assigning # symbol on the top of the stack
+
+    for(i=0; i<strlen(infix); i++){
+        symbol = infix[i];
+
+        if(isOperator(symbol)==0){
+            prefix[j] = symbol;                    //operator is sent to output
+            j++;
+        }
+        else{
+            if(symbol==')'){                       //if operator is ) then push the operands  
+                push(symbol);
+            }
+            else{
+                if(symbol == '(' ){
+                    while(stack[top] != ')' ){     //if operator is ( then pop all the operators until ) is found
+                        prefix[j] = pop();
+                        j++;
+                    }
+                    pop();                         //pop out
+                }
+                else{
+                    if(precedence(symbol) >= precedence(stack[top])){
+                        push(symbol);                 //if precedence of symbol is greater than precedence of the top of the
+                    }                                 //stack then push the symbol
+                    else{
+                        while(precedence(symbol) <= precedence(stack[top])){
+                            prefix[j] = pop();        //if precedence of symbol is lesser than precedence of the top of the
+                            j++;                      //stack then pop
+                        }  
+                        push(symbol);                 //push the symbol  
+                    }
+                }
+            }
+        }
+    }
+
+    while(stack[top] != '#'){                         //pops out the items till # is found
+        prefix[j] = pop();
+        j++;
+    }
+    prefix[j] = '\0';                                //null terminate string
+
+}
+
+void reverse(char infix[]){                         //function to reverse a infix expression
+    int i=0, j=strlen(infix)-1;
+    while(i<=j){
+        int temp = infix[i];
+        infix[i] = infix[j];
+        infix[j] = temp;
+        i++;
+        j--;
+    }
+
+}
+
+
+
+int main(){
+    char prefix[25];
+    char infix[] =  "1+2*3";
+    printf("given infix expression is : %s\n", infix);
+    reverse(infix);                                //function to reverse infix expression
+    convert(infix,prefix);                         //function to convert infix expression to prefix expression
+    reverse(prefix);                               //function to reverse prefix expression
+    printf("prefix exp is : %s\n", prefix);        //prints prefix expression
+}
